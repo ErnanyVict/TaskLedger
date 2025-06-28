@@ -29,7 +29,7 @@ class MainPage:
         def showPackage():
             for obj in self.list_objs:
                 obj.close()
-            self.package_page = PackagePage(package.package_id, self.box)
+            self.package_page = PackagePage(package.package_id, self.box, self)
         self.package_button.clicked.connect(showPackage)
         self.list_objs.append(self.package_button)
         
