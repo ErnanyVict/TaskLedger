@@ -3,6 +3,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from Model.Entities.Task import Task
+from Model.Entities.User import User
 from Model.Entities.Package import Package
 from Model.Repositories.UserRepository import UserRepository
 
@@ -62,6 +63,15 @@ class PackageRepository:
         row = self.cursor.fetchall()
         p_id, name, description, status, user_id = row[0]
         return Package(package_id, name, description, status, user_id)
+    
+    def read_by_user(self, user_id) -> list[Package]:
+        self.cursor.execute(f'SELECT * FROM {self.TABLE_NAME} WHERE user_id = {user_id}')
+        row = self.cursor.fetchall()
+        packages = []
+        for package in row:
+            p_id, name, description, status, user_id = package
+            packages.append(Package(p_id, name, description, status, User(user_id)))
+        return packages
 
     def delete_by_id(self, package_id) -> Package: 
         package_deleted = self.read_by_id(package_id)
@@ -86,8 +96,8 @@ if __name__ == "__main__":
     # repository.create_table()
     repository_user = UserRepository()
     users = repository_user.read_all()
-    for u in users:
-        print(u)
+    '''for u in users:
+        print(u)'''
 
 
     '''p1 = Package(None, "20/04", "tudo isso tem que ser feito no dia 20 de Abril", "Incomplete", users[0])
@@ -97,13 +107,12 @@ if __name__ == "__main__":
 
     p3_update = Package(None, "05/2025", "Tudo que tem que ser feito mês que vem", " Completed", users[0])
     repository.update_by_id(3, p3_update)
-    repository.delete_by_id(8)
 
-    ps = repository.read_all()
-    for p in ps:
-        print(p)
+    #ps = repository.read_all()
+    #for p in ps:
+    #    print(p)
 
-    print(repository.read_by_id(1))
+    #print(repository.read_by_id(2))
 
     '''t1_modified = t1
     t1_modified.status = "Incompleted" 
@@ -114,5 +123,8 @@ if __name__ == "__main__":
     for t in ts:
         print(t)
     '''
+
+    for package in repository.read_by_user(1):
+        print(package)
 
     repository.close()

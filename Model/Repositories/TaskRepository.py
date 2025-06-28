@@ -30,7 +30,10 @@ class TaskRepository:
             'id INTEGER PRIMARY KEY AUTOINCREMENT,'
             'name TEXT,'
             'description TEXT,'
-            'status TEXT'
+            'status TEXT,'
+            'statussss TEXT,'
+            'package_id INTEGER,'
+            'FOREIGN KEY(package_id) REFERENCES ListsTask(id)'
             ')'
         )
 
@@ -38,27 +41,26 @@ class TaskRepository:
         print("Table created")
 
     def insert(self, list_tasks: list[Task]):
-        insert = (f'INSERT INTO {self.TABLE_NAME} (name, description, status) VALUES (?, ?, ?)')
-        tasks = [(task.name, task.description, task.status) for task in list_tasks]
+        insert = (f'INSERT INTO {self.TABLE_NAME} (name, description, status, package_id) VALUES (?, ?, ?, ?)')
+        tasks = [(task.name, task.description, task.status, task.package_id) for task in list_tasks]
         self.cursor.executemany(insert, tasks)           
         self.connection.commit()
-        print("Done")
 
     def read_all(self) -> list[Task]:
         self.cursor.execute(f'SELECT * FROM {self.TABLE_NAME}')
         tasks_list = []
         
         for row in self.cursor.fetchall():
-            task_id, name, description, status = row
-            tasks_list.append(Task(task_id, name, description, status))
+            task_id, name, description, status, package_id = row
+            tasks_list.append(Task(task_id, name, description, status, package_id))
 
         return tasks_list
     
     def read_by_id(self, task_id) -> Task:
         self.cursor.execute(f'SELECT * FROM {self.TABLE_NAME} WHERE id = {task_id}')
         row = self.cursor.fetchall()
-        task_id, name, description, status = row[0]
-        return Task(task_id, name, description, status)
+        task_id, name, description, status, package_id = row[0]
+        return Task(task_id, name, description, status, package_id)
 
     def delete_by_id(self, task_id) -> Task: 
         task_deleted = self.read_by_id(task_id)
@@ -67,11 +69,20 @@ class TaskRepository:
         return task_deleted
 
     def update_by_id(self, task_id: int, task: Task):
-        self.cursor.execute(f'UPDATE {self.TABLE_NAME} SET name = ?, description = ?, status = ? WHERE id = ?',
-                            (task.name, task.description, task.status, task_id))
+        self.cursor.execute(f'UPDATE {self.TABLE_NAME} SET name = ?, description = ?, status = ?, package_id = ? WHERE id = ?',
+                            (task.name, task.description, task.status, task.package_id, task_id))
         self.connection.commit()
         return task
-
+    
+    def read_by_package(self, package_id):
+        self.cursor.execute(f'SELECT * FROM {self.TABLE_NAME} WHERE package_id = {package_id}')
+        row = self.cursor.fetchall()
+        tasks = []
+        for r in row:
+            task_id, name, description, status, package_id = r
+            tasks.append(Task(task_id, name, description, status, package_id))
+        return tasks
+    
     def close(self) -> None:
         self.cursor.close()
         self.connection.close()
@@ -79,13 +90,14 @@ class TaskRepository:
 
 if __name__ == "__main__":
 
+    
+
     repository = TaskRepository()
-
-    # repository.create_table()
-
-    t1 = Task(None, "Ir ao banheiro", "Quero fazer ainda hoje isso :D", "Completed")
-    t2 = Task(None, "Dr. Stone", "Terminar de assistir Dr. Stone ep 2 a 5", "Incomplete")
-    t3 = Task(None, "Dormir", "Vou dormir hoje até umas 3 hrs", "Incomplete")
+    '''repository.delete_all()
+    repository.create_table()
+    t1 = Task(None, "Ir ao banheiro", "Quero fazer ainda hoje isso :D", "Completed", 1)
+    t2 = Task(None, "Dr. Stone", "Terminar de assistir Dr. Stone ep 2 a 5", "Incomplete", 2)
+    t3 = Task(None, "Dormir", "Vou dormir hoje até umas 3 hrs", "Incomplete", 3)
     repository.insert([t1, t2, t3])
 
     tasks = repository.read_all()
@@ -96,12 +108,17 @@ if __name__ == "__main__":
 
     t1_modified = t1
     t1_modified.status = "Incompleted" 
-    repository.update_by_id(1, t1_modified)
+    repository.update_by_id(1, t1_modified)'''
 
     #repository.delete_by_id(2)
-    ts = repository.read_all()
+    tasks= repository.read_by_package(2)
+    for task in tasks:
+        print(task)
+    '''ts = repository.read_all()
+    for t in ts:
+        print(t)'''
+    ts = repository.read_by_package(3)
     for t in ts:
         print(t)
     
-
     repository.close()
