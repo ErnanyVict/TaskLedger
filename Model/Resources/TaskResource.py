@@ -16,7 +16,7 @@ def get_task():
     tasks = repository.read_all()
             
     for task in tasks:
-        tasks_list.append({'id': task.task_id, 'name': task.name, 'description': task.description, 'status': task.status})
+        tasks_list.append({'id': task.task_id, 'name': task.name, 'description': task.description, 'status': task.status, 'package_id': task.package_id})
 
     return jsonify(tasks_list)
 
@@ -25,7 +25,7 @@ def get_task_by_id(id):
     repository = TaskRepository()
             
     task = repository.read_by_id(int(id))
-    task_josn = [{'id': task.task_id, 'name': task.name, 'description': task.description, 'status': task.status}]
+    task_josn = [{'id': task.task_id, 'name': task.name, 'description': task.description, 'status': task.status, 'package_id': task.package_id}]
     return jsonify(task_josn)
 
 @task_bp.route('/tasks/<int:id>', methods=['DELETE'])
@@ -43,7 +43,7 @@ def insert():
     tasks = request.get_json()
 
     for task in tasks:
-        tasks_list.append(Task(None, task.get('name'), task.get('description'), task.get('status')))
+        tasks_list.append(Task(None, task.get('name'), task.get('description'), task.get('status'), task.get('package_id')))
 
     repository.insert(tasks_list)
     return jsonify(tasks)
