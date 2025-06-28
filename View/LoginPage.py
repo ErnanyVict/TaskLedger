@@ -107,7 +107,7 @@ class LoginPage:
             self.user = enter.enter()
             if self.user != None:
                 self.close_page()
-                self. mainpage.show(self.user)
+                self.mainpage.show(self.user)
         self.enter_button.clicked.connect(enter)
         self.enter_button.move(120, 400)
         return self.enter_button
