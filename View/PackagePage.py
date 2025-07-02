@@ -7,6 +7,7 @@ from Controller.getTasks import get_tasks
 from Controller import AddNewTask
 from PySide6.QtWidgets import QLabel, QCheckBox, QPushButton, QMainWindow, QLineEdit
 from PySide6.QtGui import QFont
+from Controller.DeleteTask import delete_task
 
 class PackagePage:
     def __init__(self, package_id, box, main_page):
@@ -99,7 +100,7 @@ class PackagePage:
             
             AddNewTask.add_task_DB(name_display.text(), description_display.text(), pack_id)
             tsk_window.close()
-            self.create_tasks([Task(None, name_display.text(), description_display.text(), "Incomplete", None)])
+            self.create_tasks([get_tasks(self.package_id)[-1]])
             for task in self.tasks:
                 task.show()
 
@@ -144,12 +145,13 @@ class PackagePage:
             checkbox.move(30, self.y)
 
             remove_task_button = QPushButton("X", self.box)
+            remove_task_button.id = task.task_id
             remove_task_button.setFixedSize(20, 20)
             remove_task_button.setFont(QFont("Arial", 10, QFont.Bold))
             remove_task_button.move(30, self.y+35)
             remove_task_button.setStyleSheet('color: white; background-color: #8d9db6; border-radius: 10px; padding: 0px')
             
-            def remove(t_label, cb, btn):
+            def remove(t_label, cb, btn, id_task):
                 t_label.setParent(None)
                 cb.setParent(None)
                 btn.setParent(None)
@@ -161,10 +163,13 @@ class PackagePage:
                 self.tasks.remove(btn)
                 for widget in self.tasks:
                     widget.show()
-                
+                delete_task(id_task)
+                self.close()
+                for task in self.tasks:
+                    task.show()
 
             remove_task_button.clicked.connect(
-            lambda _, t_label=task_label, cb=checkbox, btn=remove_task_button: remove(t_label, cb, btn)
+            lambda _, t_label=task_label, cb=checkbox, btn=remove_task_button, id_task=remove_task_button.id: remove(t_label, cb, btn, id_task)
             )
             self.tasks.append(remove_task_button)        
 
