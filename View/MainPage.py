@@ -3,6 +3,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from Controller.DeletePackage import delete_package
 from View.PackagePage import PackagePage
 from Controller.makePackage import MakePackage
 from PySide6.QtWidgets import (QScrollArea, QLabel, QWidget, QVBoxLayout,
@@ -28,13 +29,31 @@ class MainPage:
         self.labeldescription.setFont(QFont("Arial", 10))
         self.labeldescription.move(10, 40)
         self.package_button.setStyleSheet('background-color: #8d9db6; border-radius: 10px; border: 0px 10px 2px 0px')
+        self.id_package = package.package_id    
         def showPackage():
             for obj in self.list_objs:
                 obj.close()
             self.package_page = PackagePage(package.package_id, self.box, self)
         self.package_button.clicked.connect(showPackage)
+
+        self.delete_button = QPushButton("X", self.package_button)
+        self.delete_button.setFixedSize(20, 20)
+        self.delete_button.setFont(QFont("Arial", 7, QFont.Bold))
+        self.delete_button.move(5, 90)
+        self.delete_button.setStyleSheet('color: white; background-color: #464e63; border-radius: 5px; padding: 0px')
         self.list_objs.append(self.package_button)
         
+        def remove_package(package_button, id_package):
+            package_button.setParent(None)
+            self.list_objs.remove(package_button)
+            self.close()
+            for widget in self.list_objs:
+                    widget.show()
+            delete_package(id_package)
+
+        self.delete_button.clicked.connect(lambda _, package_button=self.package_button,
+        id_package=self.id_package: remove_package(package_button, id_package))
+
         return self.package_button
     
     def create_scroll(self):
@@ -74,7 +93,7 @@ class MainPage:
         self.scroll.setFixedSize(350, 300)
         self.scroll.move(30, 230)
         self.scroll.setViewportMargins(0, 0, 12, 0)
-        print(self.user)
+
         self.packages_list = MakePackage(self.user.user_id).get_packages()
         for package in self.packages_list:
             print(package)
@@ -166,3 +185,7 @@ class MainPage:
         self.add_package()
         for obj in self.list_objs:
             obj.show()
+
+    def close(self):
+        for widget in self.list_objs:
+            widget.close()
